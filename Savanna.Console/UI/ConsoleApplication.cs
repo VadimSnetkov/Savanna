@@ -63,12 +63,12 @@ public sealed class ConsoleApplication
                             return;
 
                         case ConsoleKey.A:
-                            AddAnimal(AnimalType.Antelope);
+                            CheckToAddAnimal(AnimalType.Antelope);
                             shouldRender = true;
                             break;
 
                         case ConsoleKey.L:
-                            AddAnimal(AnimalType.Lion);
+                            CheckToAddAnimal(AnimalType.Lion);
                             shouldRender = true;
                             break;
                     }
@@ -99,7 +99,7 @@ public sealed class ConsoleApplication
 
     /// Summary:
     /// Requests an animal spawn and updates the displayed message.
-    private void AddAnimal(AnimalType type)
+    private void CheckToAddAnimal(AnimalType type)
     {
         bool added = _spawnService.TryAddAnimal(
             _simulation.State,

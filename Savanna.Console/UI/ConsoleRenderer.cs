@@ -7,7 +7,7 @@ namespace Savanna.Console.UI;
 public sealed class ConsoleRenderer
 {
     private const char EmptyCell = '.';
-    private const char AntelopeSymbol = 'A';
+    private const char AntelopeSymbol = 'a';
     private const char LionSymbol = 'L';
 
     private const int CellDisplayWidth = 2;
