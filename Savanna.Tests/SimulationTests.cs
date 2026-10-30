@@ -90,15 +90,18 @@ public sealed class SimulationTests
                     0,
                     simulation.State.Width - 1);
 
-                int travelledDistance = MovementService.GetDistance(
-                    previousPositions[animal],
-                    animal.Position);
+                if (previousPositions.TryGetValue(animal, out var previousPosition))
+                {
+                    int travelledDistance = MovementService.GetDistance(
+                        previousPosition,
+                        animal.Position);
 
-                Assert.InRange(travelledDistance, 0, animal.Speed);
+                    Assert.InRange(travelledDistance, 0, animal.Speed);
+                }
             });
 
             Assert.Equal(
-                animalCount,
+                simulation.State.Animals.Count,
                 simulation.State.Animals
                     .Select(animal => animal.Position)
                     .Distinct()
@@ -115,10 +118,10 @@ public sealed class SimulationTests
         var behavior = new AntelopeBehavior(movementService);
 
         var antelope = new Animal(
-            AnimalType.Antelope, 1, 5, new Position(2, 2));
+    AnimalType.Antelope, 1, 5, new Position(2, 2), 100m);
 
         var lion = new Animal(
-            AnimalType.Lion, 2, 7, new Position(2, 1));
+            AnimalType.Lion, 2, 7, new Position(2, 1), 100m);
 
         Position[] allowedPositions =
         [
@@ -147,10 +150,10 @@ public sealed class SimulationTests
         var movementService = new MovementService(new Random(42));
 
         var antelope = new Animal(
-            AnimalType.Antelope, 1, 2, new Position(0, 0));
+    AnimalType.Antelope, 1, 2, new Position(0, 0), 100m);
 
         var lion = new Animal(
-            AnimalType.Lion, 2, 7, new Position(0, targetColumn));
+            AnimalType.Lion, 2, 7, new Position(0, targetColumn), 100m);
 
         var result = movementService.FindNearestVisibleAnimal(
             antelope,
@@ -178,15 +181,18 @@ public sealed class SimulationTests
             Width = width,
             Height = height,
             RoundDelayMilliseconds = 400,
+            LionEatingHealthGain = 10m,
             Antelope = new AnimalOptions
             {
                 Speed = 1,
-                VisionRange = 5
+                VisionRange = 5,
+                InitialHealth = 100m
             },
             Lion = new AnimalOptions
             {
                 Speed = 2,
-                VisionRange = 7
+                VisionRange = 7,
+                InitialHealth = 100m
             }
         };
 
@@ -196,16 +202,20 @@ public sealed class SimulationTests
         IAnimalBehavior[] behaviors =
         [
             new AntelopeBehavior(movementService),
-            new LionBehavior(movementService)
+        new LionBehavior(movementService)
         ];
+
+        var spawner = new AnimalSpawnService(options, random);
+        var healthService = new HealthService(options);
+        var birthService = new BirthService(spawner, random);
 
         var simulation = new SimulationService(
             options,
             new SimulationOptionsValidator(),
             behaviors,
-            random);
-
-        var spawner = new AnimalSpawnService(options, random);
+            random,
+            healthService,
+            birthService);
 
         return (simulation, spawner);
     }
