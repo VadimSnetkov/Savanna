@@ -47,6 +47,8 @@ internal static class Program
             services.AddSingleton<IAnimalBehavior, LionBehavior>();
 
             services.AddSingleton<AnimalSpawnService>();
+            services.AddSingleton<HealthService>();
+            services.AddSingleton<BirthService>();
             services.AddSingleton<SimulationService>();
 
             services.AddSingleton<ConsoleRenderer>();

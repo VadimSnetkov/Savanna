@@ -11,6 +11,8 @@ public sealed class SimulationService
 
     private readonly Dictionary<AnimalType, IAnimalBehavior> _behaviors;
     private readonly Random _random;
+    private readonly HealthService _healthService;
+    private readonly BirthService _birthService;
 
     public SavannaState State { get; }
 
@@ -20,17 +22,23 @@ public sealed class SimulationService
         SimulationOptions options,
         IValidator<SimulationOptions> validator,
         IEnumerable<IAnimalBehavior> behaviors,
-        Random random)
+        Random random,
+        HealthService healthService,
+        BirthService birthService)
     {
         ArgumentNullException.ThrowIfNull(options);
         ArgumentNullException.ThrowIfNull(validator);
         ArgumentNullException.ThrowIfNull(behaviors);
         ArgumentNullException.ThrowIfNull(random);
+        ArgumentNullException.ThrowIfNull(healthService);
+        ArgumentNullException.ThrowIfNull(birthService);
 
         validator.ValidateAndThrow(options);
 
         _behaviors = behaviors.ToDictionary(behavior => behavior.Type);
         _random = random;
+        _healthService = healthService;
+        _birthService = birthService;
 
         foreach (var type in Enum.GetValues<AnimalType>())
         {
@@ -46,7 +54,7 @@ public sealed class SimulationService
     }
 
     /// Summary:
-    /// Gives each surviving animal one turn in a shuffled order.
+    /// Gives surviving animals their turns, then checks for births.
     public void AdvanceRound()
     {
         var animalsThisRound = State.Animals.ToArray();
@@ -55,7 +63,8 @@ public sealed class SimulationService
 
         foreach (var animal in animalsThisRound)
         {
-            if (!State.MutableAnimals.Contains(animal))
+            if (!State.MutableAnimals.Contains(animal) ||
+                _healthService.RemoveIfDead(State, animal))
             {
                 continue;
             }
@@ -64,10 +73,11 @@ public sealed class SimulationService
         }
 
         State.Round++;
+        _birthService.ProcessRound(State);
     }
 
     /// Summary:
-    /// Moves an animal up to its speed and stops after eating prey.
+    /// Moves an animal up to its speed, applying eating and health rules.
     private void MoveAnimal(Animal animal)
     {
         var behavior = _behaviors[animal.Type];
@@ -99,11 +109,13 @@ public sealed class SimulationService
             if (prey is not null)
             {
                 State.MutableAnimals.Remove(prey);
+                _healthService.FeedLion(animal);
             }
 
             animal.Position = nextPosition;
+            _healthService.ApplyMovementCost(animal);
 
-            if (prey is not null)
+            if (_healthService.RemoveIfDead(State, animal) || prey is not null)
             {
                 break;
             }

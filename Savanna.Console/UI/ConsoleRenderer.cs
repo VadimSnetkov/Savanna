@@ -1,5 +1,5 @@
-﻿using System.Text;
-using Savanna.Core.Models;
+﻿using Savanna.Core.Models;
+using System.Text;
 using Terminal = System.Console;
 
 namespace Savanna.Console.UI;
@@ -13,7 +13,7 @@ public sealed class ConsoleRenderer
     private const int CellDisplayWidth = 2;
     private const int BorderWidth = 2;
     private const int MinimumDisplayWidth = 64;
-    private const int ExtraDisplayRows = 6;
+    private const int ExtraDisplayRows = 7;
 
     /// Summary:
     /// Draws the field, animal counts and keyboard instructions.
@@ -72,6 +72,21 @@ public sealed class ConsoleRenderer
 
         output.AppendLine(
             $"Round: {state.Round} | Antelopes: {antelopeCount} | Lions: {lionCount}");
+
+        decimal antelopeHealth = state.Animals
+            .Where(animal => animal.Type == AnimalType.Antelope)
+            .Select(animal => animal.Health)
+            .DefaultIfEmpty(0m)
+            .Average();
+
+        decimal lionHealth = state.Animals
+            .Where(animal => animal.Type == AnimalType.Lion)
+            .Select(animal => animal.Health)
+            .DefaultIfEmpty(0m)
+            .Average();
+
+        output.AppendLine(
+            $"Average health | a: {antelopeHealth:0.0} | L: {lionHealth:0.0}");
 
         output.AppendLine(border);
 

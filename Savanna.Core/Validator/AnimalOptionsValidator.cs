@@ -14,5 +14,7 @@ public sealed class AnimalOptionsValidator : AbstractValidator<AnimalOptions>
 
         RuleFor(options => options.VisionRange)
             .GreaterThanOrEqualTo(0);
+        RuleFor(options => options.InitialHealth)
+            .GreaterThan(0);
     }
 }

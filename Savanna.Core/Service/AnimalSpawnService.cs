@@ -25,12 +25,10 @@ public sealed class AnimalSpawnService
     {
         ArgumentNullException.ThrowIfNull(state);
 
-        var animalOptions = type switch
+        if (!Enum.IsDefined(type))
         {
-            AnimalType.Antelope => _options.Antelope,
-            AnimalType.Lion => _options.Lion,
-            _ => throw new ArgumentOutOfRangeException(nameof(type))
-        };
+            throw new ArgumentOutOfRangeException(nameof(type));
+        }
 
         var occupiedPositions = state.Animals
             .Select(animal => animal.Position)
@@ -59,11 +57,41 @@ public sealed class AnimalSpawnService
         var startingPosition =
             emptyPositions[_random.Next(emptyPositions.Count)];
 
+        return TryAddAnimalAt(state, type, startingPosition);
+    }
+
+    /// Summary:
+    /// Adds an animal at a specific cell if that cell is empty.
+    public bool TryAddAnimalAt(
+        SavannaState state,
+        AnimalType type,
+        Position position)
+    {
+        ArgumentNullException.ThrowIfNull(state);
+
+        var animalOptions = type switch
+        {
+            AnimalType.Antelope => _options.Antelope,
+            AnimalType.Lion => _options.Lion,
+            _ => throw new ArgumentOutOfRangeException(nameof(type))
+        };
+
+        if (position.Row >= state.Height || position.Column >= state.Width)
+        {
+            throw new ArgumentOutOfRangeException(nameof(position));
+        }
+
+        if (state.Animals.Any(animal => animal.Position == position))
+        {
+            return false;
+        }
+
         state.MutableAnimals.Add(new Animal(
             type,
             animalOptions.Speed,
             animalOptions.VisionRange,
-            startingPosition));
+            position,
+            animalOptions.InitialHealth));
 
         return true;
     }

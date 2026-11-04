@@ -28,5 +28,8 @@ public sealed class SimulationOptionsValidator
         RuleFor(options => options.Lion)
             .NotNull()
             .SetValidator(new AnimalOptionsValidator());
+
+        RuleFor(options => options.LionEatingHealthGain)
+            .GreaterThan(0);
     }
 }

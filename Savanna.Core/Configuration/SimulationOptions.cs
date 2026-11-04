@@ -7,6 +7,7 @@ public sealed class SimulationOptions
     public int Width { get; set; }
     public int Height { get; set; }
     public int RoundDelayMilliseconds { get; set; }
+    public decimal LionEatingHealthGain { get; set; }
 
     public AnimalOptions Antelope { get; set; } = new();
     public AnimalOptions Lion { get; set; } = new();
