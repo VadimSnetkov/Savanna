@@ -7,7 +7,7 @@ public sealed class HealthService
 {
     private const decimal HealthCostPerMove = 0.5m;
 
-    private readonly decimal _lionEatingHealthGain;
+    private readonly decimal _predatorEatingHealthGain;
 
     /// Summary:
     /// Creates the health service with the configured eating reward.
@@ -15,9 +15,9 @@ public sealed class HealthService
     {
         ArgumentNullException.ThrowIfNull(options);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(
-            options.LionEatingHealthGain);
+            options.PredatorEatingHealthGain);
 
-        _lionEatingHealthGain = options.LionEatingHealthGain;
+        _predatorEatingHealthGain = options.PredatorEatingHealthGain;
     }
 
     /// Summary:
@@ -30,19 +30,19 @@ public sealed class HealthService
     }
 
     /// Summary:
-    /// Restores a lion's health after it eats an antelope.
-    public void FeedLion(Animal lion)
+    /// Restores a predator's health after it eats prey.
+    public void FeedPredator(Animal predator)
     {
-        ArgumentNullException.ThrowIfNull(lion);
+        ArgumentNullException.ThrowIfNull(predator);
 
-        if (lion.Type != AnimalType.Lion)
+        if (!predator.IsPredator)
         {
             throw new ArgumentException(
-                "The animal must be a lion.",
-                nameof(lion));
+                "The animal must be a predator.",
+                nameof(predator));
         }
 
-        lion.Health += _lionEatingHealthGain;
+        predator.Health += _predatorEatingHealthGain;
     }
 
     /// Summary:

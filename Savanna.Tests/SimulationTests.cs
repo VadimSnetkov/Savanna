@@ -121,7 +121,7 @@ public sealed class SimulationTests
     AnimalType.Antelope, 1, 5, new Position(2, 2), 100m);
 
         var lion = new Animal(
-            AnimalType.Lion, 2, 7, new Position(2, 1), 100m);
+            AnimalType.Lion, 2, 7, new Position(2, 1), 100m, isPredator: true);
 
         Position[] allowedPositions =
         [
@@ -153,7 +153,7 @@ public sealed class SimulationTests
     AnimalType.Antelope, 1, 2, new Position(0, 0), 100m);
 
         var lion = new Animal(
-            AnimalType.Lion, 2, 7, new Position(0, targetColumn), 100m);
+            AnimalType.Lion, 2, 7, new Position(0, targetColumn), 100m, isPredator: true);
 
         var result = movementService.FindNearestVisibleAnimal(
             antelope,
@@ -181,15 +181,20 @@ public sealed class SimulationTests
             Width = width,
             Height = height,
             RoundDelayMilliseconds = 400,
-            LionEatingHealthGain = 10m,
+            PredatorEatingHealthGain = 10m,
             Antelope = new AnimalOptions
             {
+                Symbol = 'a',
+                SpawnKey = 'A',
                 Speed = 1,
                 VisionRange = 5,
                 InitialHealth = 100m
             },
             Lion = new AnimalOptions
             {
+                Symbol = 'L',
+                SpawnKey = 'L',
+                IsPredator = true,
                 Speed = 2,
                 VisionRange = 7,
                 InitialHealth = 100m
@@ -205,14 +210,15 @@ public sealed class SimulationTests
         new LionBehavior(movementService)
         ];
 
-        var spawner = new AnimalSpawnService(options, random);
+        var catalog = new AnimalCatalog(options, behaviors);
+        var spawner = new AnimalSpawnService(catalog, random);
         var healthService = new HealthService(options);
         var birthService = new BirthService(spawner, random);
 
         var simulation = new SimulationService(
             options,
             new SimulationOptionsValidator(),
-            behaviors,
+            catalog,
             random,
             healthService,
             birthService);

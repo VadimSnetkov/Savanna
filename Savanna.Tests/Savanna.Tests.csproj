@@ -22,4 +22,17 @@
     <ProjectReference Include="..\Savanna.Core\Savanna.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="../Savanna.Animals.Zebra/Savanna.Animals.Zebra.csproj"
+                      ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <Target Name="CopyPluginFixtures" AfterTargets="Build">
+    <ItemGroup>
+      <PluginFixtures Include="../Savanna.Animals.Zebra/bin/$(Configuration)/net10.0/*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(PluginFixtures)"
+          DestinationFolder="$(OutDir)PluginFixtures/Zebra"
+          SkipUnchangedFiles="true" />
+  </Target>
 </Project>

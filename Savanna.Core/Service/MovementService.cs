@@ -29,12 +29,23 @@ public sealed class MovementService
     public Animal? FindNearestVisibleAnimal(
         Animal observer,
         IReadOnlyList<Animal> animals,
-        AnimalType targetType)
+        string targetType)
+    {
+        return FindNearestVisibleAnimal(observer, animals,
+            animal => animal.Type == targetType);
+    }
+
+    /// Summary:
+    /// Finds the nearest visible animal matching a rule.
+    public Animal? FindNearestVisibleAnimal(
+        Animal observer,
+        IReadOnlyList<Animal> animals,
+        Func<Animal, bool> matches)
     {
         return animals
             .Where(animal =>
                 animal != observer &&
-                animal.Type == targetType &&
+                matches(animal) &&
                 GetDistance(observer.Position, animal.Position)
                     <= observer.VisionRange)
             .OrderBy(animal =>

@@ -4,7 +4,7 @@ namespace Savanna.Core.Behavior;
 
 public interface IAnimalBehavior
 {
-    AnimalType Type { get; }
+    string Type { get; }
 
     /// Summary:
     /// Chooses the animal's next position from the allowed positions.

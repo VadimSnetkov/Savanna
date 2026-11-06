@@ -23,4 +23,17 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="../Savanna.Animals.Zebra/Savanna.Animals.Zebra.csproj"
+                      ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <Target Name="CopyAnimalPlugins" AfterTargets="Build">
+    <ItemGroup>
+      <AnimalPluginFiles Include="../Savanna.Animals.Zebra/bin/$(Configuration)/net10.0/*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(AnimalPluginFiles)"
+          DestinationFolder="$(OutDir)Plugins/Zebra"
+          SkipUnchangedFiles="true" />
+  </Target>
 </Project>

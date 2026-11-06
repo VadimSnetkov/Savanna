@@ -5,30 +5,27 @@ namespace Savanna.Core.Service;
 
 public sealed class AnimalSpawnService
 {
-    private readonly SimulationOptions _options;
+    private readonly AnimalCatalog _catalog;
     private readonly Random _random;
 
     /// Summary:
     /// Creates the animal spawning service.
-    public AnimalSpawnService(SimulationOptions options, Random random)
+    public AnimalSpawnService(AnimalCatalog catalog, Random random)
     {
-        ArgumentNullException.ThrowIfNull(options);
+        ArgumentNullException.ThrowIfNull(catalog);
         ArgumentNullException.ThrowIfNull(random);
 
-        _options = options;
+        _catalog = catalog;
         _random = random;
     }
 
     /// Summary:
     /// Adds an animal to a random empty cell, returning false if full.
-    public bool TryAddAnimal(SavannaState state, AnimalType type)
+    public bool TryAddAnimal(SavannaState state, string type)
     {
         ArgumentNullException.ThrowIfNull(state);
 
-        if (!Enum.IsDefined(type))
-        {
-            throw new ArgumentOutOfRangeException(nameof(type));
-        }
+        _catalog.GetOptions(type);
 
         var occupiedPositions = state.Animals
             .Select(animal => animal.Position)
@@ -64,17 +61,12 @@ public sealed class AnimalSpawnService
     /// Adds an animal at a specific cell if that cell is empty.
     public bool TryAddAnimalAt(
         SavannaState state,
-        AnimalType type,
+        string type,
         Position position)
     {
         ArgumentNullException.ThrowIfNull(state);
 
-        var animalOptions = type switch
-        {
-            AnimalType.Antelope => _options.Antelope,
-            AnimalType.Lion => _options.Lion,
-            _ => throw new ArgumentOutOfRangeException(nameof(type))
-        };
+        var animalOptions = _catalog.GetOptions(type);
 
         if (position.Row >= state.Height || position.Column >= state.Width)
         {
@@ -91,7 +83,8 @@ public sealed class AnimalSpawnService
             animalOptions.Speed,
             animalOptions.VisionRange,
             position,
-            animalOptions.InitialHealth));
+            animalOptions.InitialHealth,
+            animalOptions.IsPredator));
 
         return true;
     }

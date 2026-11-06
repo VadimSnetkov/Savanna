@@ -112,7 +112,7 @@ public sealed class LifeCycleTests
     [InlineData(AnimalType.Antelope)]
     [InlineData(AnimalType.Lion)]
     public void AdvanceRound_AfterThreeNearbyRounds_CreatesOffspring(
-        AnimalType type)
+        string type)
     {
         var (simulation, spawner, _) = CreateGame(
             5, 3, holdPositions: true);
@@ -374,7 +374,7 @@ public sealed class LifeCycleTests
     public void SimulationOptionsValidator_RejectsInvalidHealth(int health)
     {
         var options = CreateOptions(3, 3, health, 1);
-        options.LionEatingHealthGain = health;
+        options.PredatorEatingHealthGain = health;
 
         var result = new SimulationOptionsValidator().Validate(options);
 
@@ -387,7 +387,7 @@ public sealed class LifeCycleTests
             error => error.PropertyName == "Lion.InitialHealth");
 
         Assert.Contains(result.Errors,
-            error => error.PropertyName == "LionEatingHealthGain");
+            error => error.PropertyName == "PredatorEatingHealthGain");
     }
 
     /// Summary:
@@ -407,17 +407,19 @@ public sealed class LifeCycleTests
 
         var random = new Random(42);
         var movement = new MovementService(random);
-        var spawner = new AnimalSpawnService(options, random);
         var antelopeBehavior = new TestAnimalBehavior(AnimalType.Antelope);
 
         IAnimalBehavior[] behaviors = holdPositions
             ? [antelopeBehavior, new TestAnimalBehavior(AnimalType.Lion)]
             : [new AntelopeBehavior(movement), new LionBehavior(movement)];
 
+        var catalog = new AnimalCatalog(options, behaviors);
+        var spawner = new AnimalSpawnService(catalog, random);
+
         var simulation = new SimulationService(
             options,
             new SimulationOptionsValidator(),
-            behaviors,
+            catalog,
             random,
             new HealthService(options),
             new BirthService(spawner, random));
@@ -438,15 +440,20 @@ public sealed class LifeCycleTests
             Width = width,
             Height = height,
             RoundDelayMilliseconds = 400,
-            LionEatingHealthGain = 10m,
+            PredatorEatingHealthGain = 10m,
             Antelope = new AnimalOptions
             {
+                Symbol = 'a',
+                SpawnKey = 'A',
                 Speed = antelopeSpeed,
                 VisionRange = 5,
                 InitialHealth = initialHealth
             },
             Lion = new AnimalOptions
             {
+                Symbol = 'L',
+                SpawnKey = 'L',
+                IsPredator = true,
                 Speed = 2,
                 VisionRange = 7,
                 InitialHealth = initialHealth

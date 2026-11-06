@@ -7,7 +7,7 @@ public sealed class LionBehavior : IAnimalBehavior
 {
     private readonly MovementService _movementService;
 
-    public AnimalType Type => AnimalType.Lion;
+    public string Type => AnimalType.Lion;
 
     /// Summary:
     /// Creates the lion behaviour with shared movement calculations.
@@ -19,7 +19,7 @@ public sealed class LionBehavior : IAnimalBehavior
     }
 
     /// Summary:
-    /// Moves towards the closest visible antelope or wanders.
+    /// Moves towards the closest visible prey or wanders.
     public Position GetNextPosition(
         Animal animal,
         IReadOnlyList<Animal> animals,
@@ -28,7 +28,7 @@ public sealed class LionBehavior : IAnimalBehavior
         var antelope = _movementService.FindNearestVisibleAnimal(
             animal,
             animals,
-            AnimalType.Antelope);
+            other => !other.IsPredator);
 
         if (antelope is null)
         {
