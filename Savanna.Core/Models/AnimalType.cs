@@ -1,7 +1,7 @@
 ﻿namespace Savanna.Core.Models;
 
-public enum AnimalType
+public static class AnimalType
 {
-    Antelope,
-    Lion
+    public const string Antelope = "Antelope";
+    public const string Lion = "Lion";
 }

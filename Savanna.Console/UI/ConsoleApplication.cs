@@ -14,8 +14,9 @@ public sealed class ConsoleApplication
     private readonly AnimalSpawnService _spawnService;
     private readonly ConsoleRenderer _renderer;
     private readonly SimulationOptions _options;
+    private readonly AnimalCatalog _catalog;
 
-    private string _message = "Press A or L to add animals.";
+    private string _message = "Press a species key shown above to add an animal.";
 
     /// Summary:
     /// Creates the console frontend with its required services.
@@ -23,29 +24,34 @@ public sealed class ConsoleApplication
         SimulationService simulation,
         AnimalSpawnService spawnService,
         ConsoleRenderer renderer,
-        SimulationOptions options)
+        SimulationOptions options,
+        AnimalCatalog catalog)
     {
         ArgumentNullException.ThrowIfNull(simulation);
         ArgumentNullException.ThrowIfNull(spawnService);
         ArgumentNullException.ThrowIfNull(renderer);
         ArgumentNullException.ThrowIfNull(options);
+        ArgumentNullException.ThrowIfNull(catalog);
 
         _simulation = simulation;
         _spawnService = spawnService;
         _renderer = renderer;
         _options = options;
+        _catalog = catalog;
     }
 
     /// Summary:
     /// Reads keyboard input and advances the simulation at regular intervals.
     public async Task RunAsync()
     {
-        bool previousCursorVisibility = Terminal.CursorVisible;
+        bool previousCursorVisibility = OperatingSystem.IsWindows()
+            ? Terminal.CursorVisible
+            : true;
         Terminal.CursorVisible = false;
 
         try
         {
-            _renderer.Render(_simulation.State, _message);
+            _renderer.Render(_simulation.State, _catalog.LastBehaviorError ?? _message);
 
             var roundTimer = Stopwatch.StartNew();
 
@@ -55,22 +61,21 @@ public sealed class ConsoleApplication
 
                 if (Terminal.KeyAvailable)
                 {
-                    var key = Terminal.ReadKey(intercept: true).Key;
+                    var key = Terminal.ReadKey(intercept: true);
 
-                    switch (key)
+                    if (key.Key == ConsoleKey.Escape)
                     {
-                        case ConsoleKey.Escape:
-                            return;
+                        return;
+                    }
 
-                        case ConsoleKey.A:
-                            CheckToAddAnimal(AnimalType.Antelope);
-                            shouldRender = true;
-                            break;
+                    var species = _catalog.Animals.FirstOrDefault(entry =>
+                        char.ToUpperInvariant(entry.Value.SpawnKey) ==
+                        char.ToUpperInvariant(key.KeyChar));
 
-                        case ConsoleKey.L:
-                            CheckToAddAnimal(AnimalType.Lion);
-                            shouldRender = true;
-                            break;
+                    if (species.Key is not null)
+                    {
+                        CheckToAddAnimal(species.Key);
+                        shouldRender = true;
                     }
                 }
 
@@ -84,7 +89,7 @@ public sealed class ConsoleApplication
 
                 if (shouldRender)
                 {
-                    _renderer.Render(_simulation.State, _message);
+                    _renderer.Render(_simulation.State, _catalog.LastBehaviorError ?? _message);
                 }
 
                 await Task.Delay(InputPollMilliseconds);
@@ -99,7 +104,7 @@ public sealed class ConsoleApplication
 
     /// Summary:
     /// Requests an animal spawn and updates the displayed message.
-    private void CheckToAddAnimal(AnimalType type)
+    private void CheckToAddAnimal(string type)
     {
         bool added = _spawnService.TryAddAnimal(
             _simulation.State,

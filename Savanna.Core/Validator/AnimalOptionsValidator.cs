@@ -9,6 +9,14 @@ public sealed class AnimalOptionsValidator : AbstractValidator<AnimalOptions>
     /// Defines valid movement settings for an animal.
     public AnimalOptionsValidator()
     {
+        RuleFor(options => options.Symbol)
+            .Must(char.IsAsciiLetterOrDigit)
+            .WithMessage("Symbol must be an ASCII letter or digit.");
+
+        RuleFor(options => options.SpawnKey)
+            .Must(char.IsAsciiLetterOrDigit)
+            .WithMessage("SpawnKey must be an ASCII letter or digit.");
+
         RuleFor(options => options.Speed)
             .GreaterThan(0);
 

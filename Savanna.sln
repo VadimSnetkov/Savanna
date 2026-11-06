@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Savanna.Core", "Savanna.Cor
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Savanna.Tests", "Savanna.Tests\Savanna.Tests.csproj", "{4145E101-96F5-4AC3-9DBC-54FC3D7A5F73}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Savanna.Animals.Zebra", "Savanna.Animals.Zebra\Savanna.Animals.Zebra.csproj", "{EA04E7FB-C437-440B-9B0F-09618791274D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +57,18 @@ Global
 		{4145E101-96F5-4AC3-9DBC-54FC3D7A5F73}.Release|x64.Build.0 = Release|Any CPU
 		{4145E101-96F5-4AC3-9DBC-54FC3D7A5F73}.Release|x86.ActiveCfg = Release|Any CPU
 		{4145E101-96F5-4AC3-9DBC-54FC3D7A5F73}.Release|x86.Build.0 = Release|Any CPU
+		{EA04E7FB-C437-440B-9B0F-09618791274D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA04E7FB-C437-440B-9B0F-09618791274D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EA04E7FB-C437-440B-9B0F-09618791274D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{EA04E7FB-C437-440B-9B0F-09618791274D}.Debug|x64.Build.0 = Debug|Any CPU
+		{EA04E7FB-C437-440B-9B0F-09618791274D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{EA04E7FB-C437-440B-9B0F-09618791274D}.Debug|x86.Build.0 = Debug|Any CPU
+		{EA04E7FB-C437-440B-9B0F-09618791274D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EA04E7FB-C437-440B-9B0F-09618791274D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EA04E7FB-C437-440B-9B0F-09618791274D}.Release|x64.ActiveCfg = Release|Any CPU
+		{EA04E7FB-C437-440B-9B0F-09618791274D}.Release|x64.Build.0 = Release|Any CPU
+		{EA04E7FB-C437-440B-9B0F-09618791274D}.Release|x86.ActiveCfg = Release|Any CPU
+		{EA04E7FB-C437-440B-9B0F-09618791274D}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

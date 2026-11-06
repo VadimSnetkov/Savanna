@@ -32,6 +32,12 @@ internal static class Program
                 ?? throw new InvalidOperationException(
                     "Simulation configuration is missing.");
 
+            new SimulationOptionsValidator().ValidateAndThrow(options);
+
+            string pluginDirectory = Path.GetFullPath(
+                Path.Combine(AppContext.BaseDirectory, options.PluginDirectory));
+            var plugins = new PluginLoader().Load(pluginDirectory);
+
             IServiceCollection services = new ServiceCollection();
 
             services.AddSingleton(options);
@@ -46,6 +52,12 @@ internal static class Program
             services.AddSingleton<IAnimalBehavior, AntelopeBehavior>();
             services.AddSingleton<IAnimalBehavior, LionBehavior>();
 
+            foreach (var behavior in plugins.Behaviors)
+            {
+                services.AddSingleton<IAnimalBehavior>(behavior);
+            }
+
+            services.AddSingleton<AnimalCatalog>();
             services.AddSingleton<AnimalSpawnService>();
             services.AddSingleton<HealthService>();
             services.AddSingleton<BirthService>();
@@ -55,6 +67,20 @@ internal static class Program
             services.AddSingleton<ConsoleApplication>();
 
             using var serviceProvider = services.BuildServiceProvider();
+
+            var catalog = serviceProvider.GetRequiredService<AnimalCatalog>();
+            var warnings = plugins.Warnings.Concat(catalog.Warnings).ToArray();
+
+            if (warnings.Length > 0)
+            {
+                foreach (string warning in warnings)
+                {
+                    Terminal.WriteLine(warning);
+                }
+
+                Terminal.WriteLine("Press Enter to continue with available animals.");
+                Terminal.ReadLine();
+            }
 
             var application =
                 serviceProvider.GetRequiredService<ConsoleApplication>();

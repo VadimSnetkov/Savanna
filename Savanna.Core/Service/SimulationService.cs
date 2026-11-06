@@ -9,7 +9,7 @@ public sealed class SimulationService
 {
     private const int NeighbourStep = 1;
 
-    private readonly Dictionary<AnimalType, IAnimalBehavior> _behaviors;
+    private readonly AnimalCatalog _catalog;
     private readonly Random _random;
     private readonly HealthService _healthService;
     private readonly BirthService _birthService;
@@ -21,34 +21,24 @@ public sealed class SimulationService
     public SimulationService(
         SimulationOptions options,
         IValidator<SimulationOptions> validator,
-        IEnumerable<IAnimalBehavior> behaviors,
+        AnimalCatalog catalog,
         Random random,
         HealthService healthService,
         BirthService birthService)
     {
         ArgumentNullException.ThrowIfNull(options);
         ArgumentNullException.ThrowIfNull(validator);
-        ArgumentNullException.ThrowIfNull(behaviors);
+        ArgumentNullException.ThrowIfNull(catalog);
         ArgumentNullException.ThrowIfNull(random);
         ArgumentNullException.ThrowIfNull(healthService);
         ArgumentNullException.ThrowIfNull(birthService);
 
         validator.ValidateAndThrow(options);
 
-        _behaviors = behaviors.ToDictionary(behavior => behavior.Type);
+        _catalog = catalog;
         _random = random;
         _healthService = healthService;
         _birthService = birthService;
-
-        foreach (var type in Enum.GetValues<AnimalType>())
-        {
-            if (!_behaviors.ContainsKey(type))
-            {
-                throw new ArgumentException(
-                    $"No behaviour is registered for {type}.",
-                    nameof(behaviors));
-            }
-        }
 
         State = new SavannaState(options.Width, options.Height);
     }
@@ -80,22 +70,14 @@ public sealed class SimulationService
     /// Moves an animal up to its speed, applying eating and health rules.
     private void MoveAnimal(Animal animal)
     {
-        var behavior = _behaviors[animal.Type];
-
         for (int step = 0; step < animal.Speed; step++)
         {
             var allowedPositions = GetAllowedPositions(animal);
 
-            var nextPosition = behavior.GetNextPosition(
+            var nextPosition = _catalog.GetNextPosition(
                 animal,
                 State.Animals,
                 allowedPositions);
-
-            if (!allowedPositions.Contains(nextPosition))
-            {
-                throw new InvalidOperationException(
-                    $"{animal.Type} selected an invalid position.");
-            }
 
             if (nextPosition == animal.Position)
             {
@@ -109,7 +91,7 @@ public sealed class SimulationService
             if (prey is not null)
             {
                 State.MutableAnimals.Remove(prey);
-                _healthService.FeedLion(animal);
+                _healthService.FeedPredator(animal);
             }
 
             animal.Position = nextPosition;
@@ -153,8 +135,7 @@ public sealed class SimulationService
                 bool canEnter =
                     occupant is null ||
                     occupant == animal ||
-                    (animal.Type == AnimalType.Lion &&
-                     occupant.Type == AnimalType.Antelope);
+                    (animal.IsPredator && !occupant.IsPredator);
 
                 if (canEnter)
                 {
